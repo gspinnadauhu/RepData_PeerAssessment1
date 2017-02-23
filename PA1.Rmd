@@ -1,0 +1,74 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+author: "gspinnada uhu"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+Unzipping & Loading data
+```{r}
+unzip("./activity.zip")
+activity<-read.csv("./activity.csv")
+```
+Reclassing date as Date and steps as numeric
+```{r}
+activity$date<-as.Date(activity$date,"%Y-%m-%d")
+activity$steps<-as.numeric(activity$steps)
+```
+
+
+## What is mean total number of steps taken per day?
+1.  Calculating the total number of steps taken per day
+    ```{r}
+    totalsteps_day<-with(activity,tapply(steps,date,sum,na.rm=TRUE))
+    ```
+2.  Making a histogram of the total number of steps taken each day
+    ```{r fig.align='center'}
+    hist(totalsteps_day,
+      main="Total Number of Steps taken per Day",
+      xlab="Steps")
+    ```
+3.  Calculating the mean and median of the total number of steps taken per day
+  a) Mean
+    ```{r}
+    mean(totalsteps_day)
+    ```
+  b) Median
+    ```{r}
+    median(totalsteps_day)
+    ```
+
+
+## What is the average daily activity pattern?
+1.  Time series plot of the 5-minute intervals in a day (x) vs the average number of steps taken per interval for all days (y)
+  a) Calculating average number of steps per interval + creating dataframe with averages and interval numbers
+    ```{r}
+    mean_steps_int<-with(activity,tapply(steps,interval,mean,na.rm=TRUE))
+    unique_int<-unique(activity$interval)
+    unique_df<-data.frame(unique_int,mean_steps_int)
+    names(unique_df)<-c("unique_int","mean_steps")
+    ```
+  b) Creating plot, using unique values in interval as x-axis and mean_steps_int as y
+    ```{r}
+    library(ggplot2)
+    ggplot(data=unique_df,aes(x=unique_int,y=mean_steps))+
+            geom_point()+
+            labs(x="Interval Number",y="Average Steps",title="Average Steps per Interval")
+    ```
+
+2.  Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+    ```{r}
+    library(dplyr)
+    int_max_step_avg<-filter(unique_df,mean_steps==max(mean_steps))
+    ```
+    Interval number `r int_max_step_avg[1,1]` has the highest average number of steps - `r int_max_step_avg[1,2]`.
+
+## Imputing missing values
+1.  Counting the total number of rows containing any NA values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
