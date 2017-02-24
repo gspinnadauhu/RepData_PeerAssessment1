@@ -67,8 +67,40 @@ activity$steps<-as.numeric(activity$steps)
     Interval number `r int_max_step_avg[1,1]` has the highest average number of steps - `r int_max_step_avg[1,2]`.
 
 ## Imputing missing values
-1.  Counting the total number of rows containing any NA values
-
-
+1.  Counting the total number of NAs in steps; date & interval do not have NAs as they are descriptive and not measurements
+    ```{r}
+    length(activity$steps[is.na(activity$steps)==TRUE])
+    ```
+    There are `r length(activity$steps[is.na(activity$steps)==TRUE])` rows containing missing values.
+2.  Replacing NAs with mean for the respective 5minute interval in a new df activity_imputed.
+    Looping through steps vector, replacing each NA value with matching interval's mean steps value from unique_df.
+    ```{r}
+    activity_imputed<-activity
+    for (i in 1:length(activity_imputed$steps)){
+            if (is.na(activity_imputed$steps[i])){
+                    a<-activity_imputed$interval[i]
+                    b<-match(a,unique_df$unique_int)
+                    activity_imputed$steps[i]<-unique_df$mean_steps[b]
+            }
+    }
+    ```
+3.  See code for 2. above. Code creates activity_imputed df with NAs replaced using average steps per interval from df created in daily activity pattern section.
+4.  Histogram of the total number of steps taken each day and reporting the mean and median total number of steps taken per day.
+  a) Histogram of total steps per day including imputed values
+    ```{r fig.align='center'}
+    totalsteps_day_rmNA<-with(activity_imputed,tapply(steps,date,sum,na.rm=TRUE))
+    hist(totalsteps_day_rmNA,
+      main="Total Number of Steps taken per Day, NAs replaced",
+      xlab="Steps")
+    ```
+  b) Mean & Median of dataset with imputed values
+    ```{r}
+    answ<-c(mean(totalsteps_day_rmNA),median(totalsteps_day_rmNA))
+    answ
+    ```
+    The mean for the dataset with replaced NAs is `r answ[1]` compared to the original mean of `r mean(totalsteps_day)`.
+    The median for the dataset with replaced NAs is `r answ[2]` compared to the original mean of `r median(totalsteps_day)`.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+1.  Creating new factor variable with 2 levels -"weekday" and "weekend" based on date
+2.  Panel plot with time series of 5 minute invervals vs average steps taken on weekdays vs weekend days
