@@ -63,6 +63,7 @@ activity$steps<-as.numeric(activity$steps)
     ```{r}
     library(dplyr)
     int_max_step_avg<-filter(unique_df,mean_steps==max(mean_steps))
+    int_max_step_avg
     ```
     Interval number `r int_max_step_avg[1,1]` has the highest average number of steps - `r int_max_step_avg[1,2]`.
 
@@ -102,5 +103,20 @@ activity$steps<-as.numeric(activity$steps)
     The median for the dataset with replaced NAs is `r answ[2]` compared to the original mean of `r median(totalsteps_day)`.
 
 ## Are there differences in activity patterns between weekdays and weekends?
-1.  Creating new factor variable with 2 levels -"weekday" and "weekend" based on date
+1.  Creating new factor variable "day" with 2 levels - "weekday" and "weekend" based on date
+    ```{r}
+    library(dplyr)
+    activity_imputed<-mutate(activity_imputed,day=ifelse(weekdays(date) %in% c("Saturday","Sunday"),"Weekend","Weekday"))
+    activity_imputed$day<-as.factor(activity_imputed$day)
+    ```
 2.  Panel plot with time series of 5 minute invervals vs average steps taken on weekdays vs weekend days
+    ```{r}
+    library(dplyr)
+    activity_summary<-summarise(group_by(activity_imputed,interval,day),mean(steps))
+    names(activity_summary)[3]<-"meansteps"
+    library(ggplot2)
+    ggplot(data=activity_summary,aes(x=interval,y=meansteps))+
+            facet_grid(day~.)+
+            geom_point()+
+            labs(x="Interval Number",y="Average Steps",title="Average Steps per Interval")
+    ```
